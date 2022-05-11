@@ -145,6 +145,7 @@ int main(void)
     // DELETE
     int parts = 9;
     glm::vec3 traslada_frame(0.0f);
+    float rota_frame = 0.0f;
 
     ModeloRobot robot("E:/TareasProyectos/8vo/Robotica/RobotManipuladorMovil-DenavitHartenberg/Robot/OBJ_Robot.obj", height, width, shader, true);
 
@@ -165,6 +166,7 @@ int main(void)
         glUseProgram(shader);
         robot.how_many_parts = parts;
         
+        robot.rotateLastFrame(rota_frame);
         robot.moveLastFrame(traslada_frame);
 
         robot.rotaBase(rotacion_base);
@@ -181,6 +183,7 @@ int main(void)
 
             ImGui::Checkbox("Muestra ejes",&muestra_ejes);
             ImGui::SliderFloat3("Traslada frame", &traslada_frame.x, -15.0f, 15.0f);
+            ImGui::SliderFloat("Rotacion frame", &rota_frame, 0.0f, 360.0f);
 
             ImGui::SliderFloat3("Traslacion", &xy.x, -15.0f, 15.0f);
             ImGui::SliderFloat("Rotacion", &rotacion_base, 0.0f, 360.0f);

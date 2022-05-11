@@ -27,12 +27,26 @@ ModeloRobot::ModeloRobot(std::string path, int height, int width, unsigned int s
 	piezas.push_back(
 		DenavitHartenberg(centros[0], glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f))
 	);
+	vector_gap.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+	angle_gap.push_back(0.0f);
+
 	piezas.push_back(
-		DenavitHartenberg(centros[1] + glm::vec3(-1.337f, 2.228f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f))
+		DenavitHartenberg(centros[1], glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f))
 	);
+	vector_gap.push_back(glm::vec3(-1.337f, 2.228f, 0.0f));
+	angle_gap.push_back(54.897f);
+
 	piezas.push_back(
 		DenavitHartenberg(centros[2], glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f))
 	);
+	vector_gap.push_back(glm::vec3(5.495f, 8.465f, -5.680f));
+	angle_gap.push_back(54.897f);
+
+	piezas.push_back(
+		DenavitHartenberg(centros[4], glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f))
+	);
+	vector_gap.push_back(glm::vec3(-4.010f, -3.119f, 6.262f));
+	angle_gap.push_back(54.897f);
 
 	/*piezas.push_back(
 		DenavitHartenberg(centros[1], glm::vec3(0.0f, 1.0f, 0.0f), &piezas[0])
@@ -180,6 +194,11 @@ void ModeloRobot::moveLastFrame(glm::vec3 d) {
 	return;
 }
 
+void ModeloRobot::rotateLastFrame(float alpha_) {
+	rota_last_frame = alpha_;
+	return;
+}
+
 void ModeloRobot::printCenterOfFrame() {
 	printf("[Center of last frame]\n\t%.8f %.8f %.8f\n\n", (piezas[ piezas.size() - 1 ].getO() + traslacion_frame).x, (piezas[piezas.size() - 1].getO() + traslacion_frame).y, (piezas[piezas.size() - 1].getO() + traslacion_frame).z);
 }
@@ -324,8 +343,8 @@ void ModeloRobot::dibujaRobot() {
 	// view = glm::translate(view, glm::vec3(0.0f, 0.0f, -min_z - min_z));
 
 	glm::mat4 view = glm::lookAt(
-		glm::vec3(0.0f, 20.0f, min_z - 100.0f), // eye
-		glm::vec3(0.0f, 20.0f, 0.0f),		 // center
+		glm::vec3(0.0f, 35.0f, min_z - 100.0f), // eye
+		glm::vec3(0.0f, 35.0f, 0.0f),		 // center
 		glm::vec3(0.0f, 1.0f, 0.0f)			 // up
 	);
 
@@ -387,7 +406,37 @@ void ModeloRobot::dibujaRobot() {
 	}
 
 	if (muestra_ejes) {
-		model = glm::rotate(glm::mat4(1.0f), glm::radians(rotaciones[1]), glm::vec3(0.0f, 1.0f, 0.0f));
+		for (int i = 0; i < piezas.size(); i++) {
+			float __extra__ = 0.0f;
+			if (i + 1 >= piezas.size()) __extra__ = rota_last_frame;
+			model = glm::rotate(glm::mat4(1.0f), glm::radians(rotaciones[1]), glm::vec3(0.0f, 1.0f, 0.0f));
+
+			glm::vec3 __extra_v__(0.0f);
+			if (i + 1 >= piezas.size()) __extra_v__ = traslacion_frame;
+			model = glm::translate(model, -centros[0] + vector_gap[i] + __extra_v__);
+
+			model = glm::translate(model, piezas[i].getO());
+			model = glm::rotate(model, glm::radians(angle_gap[i] + __extra__), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::translate(model, -piezas[i].getO());
+
+			glBindBuffer(GL_ARRAY_BUFFER, buffer_ejes);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_ejes);
+
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), 0);
+
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const void*)(3 * sizeof(float)));
+
+			glUniformMatrix4fv(view_location, 1, GL_FALSE, glm::value_ptr(view));
+			glUniformMatrix4fv(proj_location, 1, GL_FALSE, glm::value_ptr(proj));
+			glUniformMatrix4fv(model_location, 1, GL_FALSE, glm::value_ptr(model));
+
+			glLineWidth(2.0f);
+			glDrawElements(GL_LINES, conexiones_por_frame, GL_UNSIGNED_INT, (const void*)(i * conexiones_por_frame * sizeof(unsigned int)));
+		}
+
+		/*model = glm::rotate(glm::mat4(1.0f), glm::radians(rotaciones[1]), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::translate(model, -centros[0]);
 		
 		glBindBuffer(GL_ARRAY_BUFFER, buffer_ejes);
@@ -406,11 +455,13 @@ void ModeloRobot::dibujaRobot() {
 		glLineWidth(2.0f);
 		glDrawElements(GL_LINES, conexion_ejes.size() - conexiones_last_frame, GL_UNSIGNED_INT, 0);
 
+		model = glm::rotate(glm::mat4(1.0f), glm::radians(rotaciones[1] + rota_last_frame), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(model, -centros[0]);
 		model = glm::translate(model, this->traslacion_frame);
 		glUniformMatrix4fv(model_location, 1, GL_FALSE, glm::value_ptr(model));
 
 		glLineWidth(2.0f);
-		glDrawElements(GL_LINES, conexiones_last_frame, GL_UNSIGNED_INT, (const void*)((conexion_ejes.size() - conexiones_last_frame) * sizeof(unsigned int)) );
+		glDrawElements(GL_LINES, conexiones_last_frame, GL_UNSIGNED_INT, (const void*)((conexion_ejes.size() - conexiones_last_frame) * sizeof(unsigned int)) );*/
 	}
 
 	return;

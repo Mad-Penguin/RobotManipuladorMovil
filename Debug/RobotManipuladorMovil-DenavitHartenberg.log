@@ -1,6 +1,9 @@
 ﻿  ModeloRobot.cpp
 E:\TareasProyectos\8vo\Robotica\RobotManipuladorMovil-DenavitHartenberg\src\ModeloRobot.cpp(19,20): warning C4018: '<': no coinciden signed/unsigned
-E:\TareasProyectos\8vo\Robotica\RobotManipuladorMovil-DenavitHartenberg\src\ModeloRobot.cpp(158,20): warning C4018: '<': no coinciden signed/unsigned
-E:\TareasProyectos\8vo\Robotica\RobotManipuladorMovil-DenavitHartenberg\src\ModeloRobot.cpp(270,32): warning C4018: '<': no coinciden signed/unsigned
-E:\TareasProyectos\8vo\Robotica\RobotManipuladorMovil-DenavitHartenberg\src\ModeloRobot.cpp(275,21): warning C4018: '<': no coinciden signed/unsigned
+E:\TareasProyectos\8vo\Robotica\RobotManipuladorMovil-DenavitHartenberg\src\ModeloRobot.cpp(172,20): warning C4018: '<': no coinciden signed/unsigned
+E:\TareasProyectos\8vo\Robotica\RobotManipuladorMovil-DenavitHartenberg\src\ModeloRobot.cpp(289,32): warning C4018: '<': no coinciden signed/unsigned
+E:\TareasProyectos\8vo\Robotica\RobotManipuladorMovil-DenavitHartenberg\src\ModeloRobot.cpp(294,21): warning C4018: '<': no coinciden signed/unsigned
+E:\TareasProyectos\8vo\Robotica\RobotManipuladorMovil-DenavitHartenberg\src\ModeloRobot.cpp(409,21): warning C4018: '<': no coinciden signed/unsigned
+E:\TareasProyectos\8vo\Robotica\RobotManipuladorMovil-DenavitHartenberg\src\ModeloRobot.cpp(411,14): warning C4018: '>=': no coinciden signed/unsigned
+E:\TareasProyectos\8vo\Robotica\RobotManipuladorMovil-DenavitHartenberg\src\ModeloRobot.cpp(415,14): warning C4018: '>=': no coinciden signed/unsigned
   RobotManipuladorMovil-DenavitHartenberg.vcxproj -> E:\TareasProyectos\8vo\Robotica\RobotManipuladorMovil-DenavitHartenberg\Debug\RobotManipuladorMovil-DenavitHartenberg.exe
