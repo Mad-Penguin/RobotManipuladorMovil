@@ -23,7 +23,15 @@ ModeloRobot::ModeloRobot(std::string path, int height, int width, unsigned int s
 	printf("centro[0]: (%.2f, %.2f, %.2f)\n", centros[0].x, centros[0].y, centros[0].z);
 	printf("centro[1]: (%.2f, %.2f, %.2f)\n", centros[1].x, centros[1].y, centros[1].z);
 	printf("centro[2]: (%.2f, %.2f, %.2f)\n", centros[2].x, centros[2].y, centros[2].z);
+	
+	
+	/*
+	---------------------------------------------------------------------------------------
 
+	Frames originales, sin aplicar DH
+
+	---------------------------------------------------------------------------------------
+	
 	piezas.push_back(
 		DenavitHartenberg(centros[0], glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f))
 	);
@@ -47,13 +55,44 @@ ModeloRobot::ModeloRobot(std::string path, int height, int width, unsigned int s
 	);
 	vector_gap.push_back(glm::vec3(-4.010f, -3.119f, 6.262f));
 	angle_gap.push_back(54.897f);
+	*/
 
-	/*piezas.push_back(
-		DenavitHartenberg(centros[1], glm::vec3(0.0f, 1.0f, 0.0f), &piezas[0])
-	);
-	piezas.push_back(
-		DenavitHartenberg(centros[2], glm::vec3(0.0f, 0.0f, 1.0f), &piezas[1])
-	);*/
+	/*
+	---------------------------------------------------------------------------------------
+
+	Frames para aplicar DH
+
+	---------------------------------------------------------------------------------------
+	*/
+	vector_gap.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+	angle_gap.push_back(0.0f);
+
+	vector_gap.push_back(glm::vec3(-1.337f, 2.228f, 0.0f));
+	angle_gap.push_back(54.897f);
+
+	vector_gap.push_back(glm::vec3(5.495f, 8.465f, -5.680f));
+	angle_gap.push_back(54.897f);
+
+	vector_gap.push_back(glm::vec3(-4.010f, -3.119f, 6.262f));
+	angle_gap.push_back(54.897f);
+
+	piezas.resize(4);
+	piezas[0] = DenavitHartenberg(centros[0], glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), TIPO_ACCION::ROTATION);
+	piezas[1] = DenavitHartenberg(centros[1] + vector_gap[1], glm::rotate(glm::vec3(0.0f, 0.0f, 1.0f), glm::radians(angle_gap[1]), glm::vec3(0.0f, 1.0f, 0.0f)), &(piezas[0]), TIPO_ACCION::ROTATION);
+	piezas[2] = DenavitHartenberg(centros[2] + vector_gap[2], glm::rotate(glm::vec3(0.0f, 0.0f, 1.0f), glm::radians(angle_gap[2]), glm::vec3(0.0f, 1.0f, 0.0f)), &(piezas[1]), TIPO_ACCION::ROTATION);
+	piezas[3] = DenavitHartenberg(centros[4] + vector_gap[3], glm::rotate(glm::vec3(0.0f, 0.0f, 1.0f), glm::radians(angle_gap[3]), glm::vec3(0.0f, 1.0f, 0.0f)), &(piezas[2]), TIPO_ACCION::ROTATION);
+	
+	frame_principal = {
+		&(piezas[0]),
+		&(piezas[0]),
+		&(piezas[1]),
+		&(piezas[2]),
+		&(piezas[2]),
+		&(piezas[3]),
+		&(piezas[3]),
+		&(piezas[3]),
+		&(piezas[3]),
+	};
 
 	if (show_logs) {
 		printf("[Info] Clases DenavitHartenberg instanciadas:\n");
@@ -329,7 +368,21 @@ void ModeloRobot::traslada(glm::vec3 mv) {
 }
 
 void ModeloRobot::rotaBase(float alpha_) {
-	rotaciones[1] = alpha_;
+	//rotaciones[1] = alpha_;
+	piezas[0].rota(alpha_);
+	return;
+}
+
+void ModeloRobot::rotaBrazo1(float alpha_) {
+	piezas[1].rota(alpha_);
+	return;
+}
+void ModeloRobot::rotaBrazo2(float alpha_) {
+	piezas[2].rota(alpha_);
+	return;
+}
+void ModeloRobot::rotaPinza(float alpha_) {
+	piezas[3].rota(alpha_);
 	return;
 }
 
@@ -373,7 +426,7 @@ void ModeloRobot::dibujaRobot() {
 	*/
 	
 	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::rotate(model, glm::radians(rotaciones[1]), glm::vec3(0.0f, 1.0f, 0.0f));
+	//model = glm::rotate(model, glm::radians(rotaciones[1]), glm::vec3(0.0f, 1.0f, 0.0f));
 	model = glm::translate(model, -centros[0]);
 
 	for (int i = 0; i < how_many_parts /*vertices_por_partes.size()*/; i++) {
@@ -386,6 +439,8 @@ void ModeloRobot::dibujaRobot() {
 
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const void*)(3 * sizeof(float)));
+
+		model = frame_principal[i]->getModel(false);
 
 		glUniformMatrix4fv(view_location, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(proj_location, 1, GL_FALSE, glm::value_ptr(proj));
@@ -405,6 +460,8 @@ void ModeloRobot::dibujaRobot() {
 		glDrawElements(GL_TRIANGLES, 3*faces_por_partes[i], GL_UNSIGNED_INT, 0);
 	}
 
+	//getchar();
+
 	if (muestra_ejes) {
 		for (int i = 0; i < piezas.size(); i++) {
 			float __extra__ = 0.0f;
@@ -418,6 +475,11 @@ void ModeloRobot::dibujaRobot() {
 			model = glm::translate(model, piezas[i].getO());
 			model = glm::rotate(model, glm::radians(angle_gap[i] + __extra__), glm::vec3(0.0f, 1.0f, 0.0f));
 			model = glm::translate(model, -piezas[i].getO());
+
+			// Eliminar esto para aplicar vector gap y angle gap
+			//model = glm::rotate(glm::mat4(1.0f), glm::radians(rotaciones[1]), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::translate(glm::mat4(1.0f), -centros[0]);
+
 
 			glBindBuffer(GL_ARRAY_BUFFER, buffer_ejes);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_ejes);

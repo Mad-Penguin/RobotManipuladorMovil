@@ -25,6 +25,8 @@ private:
 	float min_z, max_z;
 
 	std::vector<glm::vec3> centros;
+
+	std::vector< DenavitHartenberg* > frame_principal;
 	
 	// OpenGL
 	int height, width;
@@ -67,6 +69,9 @@ public:
 
 	void traslada(glm::vec3 mv);
 	void rotaBase(float alpha);
+	void rotaBrazo1(float alpha);
+	void rotaBrazo2(float alpha);
+	void rotaPinza(float alpha);
 
 	void dibujaRobot();
 	void muestraEjes(bool flag);

@@ -1,10 +1,12 @@
 #include "DenavitHartenberg.h"
 
-DenavitHartenberg::DenavitHartenberg(glm::vec3 o, glm::vec3 x, glm::vec3 y, glm::vec3 z) {
-	this->o = o;
-	this->x = x;
-	this->y = y;
-	this->z = z;
+
+DenavitHartenberg::DenavitHartenberg(glm::vec3 o, glm::vec3 x, glm::vec3 y, glm::vec3 z, TIPO_ACCION tipo) {
+	this->o = this->origin_o = o;
+	this->x = x / norm(x);
+	this->y = y / norm(y);
+	this->z = z / norm(z);
+	this->tipo = tipo;
 	this->anterior = nullptr;
 	return;
 }
@@ -13,9 +15,11 @@ float DenavitHartenberg::norm(glm::vec3 v) {
 	return glm::sqrt(glm::dot(v, v));
 }
 
-DenavitHartenberg::DenavitHartenberg(glm::vec3 por_donde_pasa_z, glm::vec3 z, DenavitHartenberg* anterior) {
+DenavitHartenberg::DenavitHartenberg(glm::vec3 por_donde_pasa_z, glm::vec3 z, DenavitHartenberg* anterior, TIPO_ACCION tipo) {
 	this->z = z / norm(z);
 	this->anterior = anterior;
+	this->tipo = tipo;
+	this->origin_o = por_donde_pasa_z;
 
 	glm::vec3 p1 = por_donde_pasa_z, p2 = por_donde_pasa_z + z;
 	glm::vec3 p3 = anterior->o, p4 = anterior->o + anterior->z;
@@ -118,21 +122,48 @@ bool DenavitHartenberg::lineLineIntersect(
 }
 
 void DenavitHartenberg::rota(float alpha) {
+	if (this->tipo == TIPO_ACCION::PRISMATIC) {
+		printf("[Warning] Se esta intentando rotar un eje declarado como prismatic, si bien esto no tendra efecto debes checar el codigo\n");
+		return;
+	}
 	this->alpha = alpha;
 	return;
 }
 
 void DenavitHartenberg::traslada(glm::vec3 mv) {
+	if (this->tipo == TIPO_ACCION::ROTATION) {
+		printf("[Warning] Se esta intentando trasladar un eje declarado como rotacion, si bien esto no tendra efecto debes checar el codigo\n");
+		return;
+	}
 	this->mv = mv;
 	return;
 }
 
-glm::mat4 DenavitHartenberg::getModel() {
-	model = glm::translate(glm::mat4(1.0f), this->mv);
-	model = glm::rotate(model, glm::radians(this->alpha), this->z);
-	model = glm::translate(model, -this->o);
-	if (this->anterior) model = model * this->anterior->model;
-	return model;
+/*
+- Transformacion para cada frame
+- Renderizar respecto al frame 0
+*/
+
+glm::mat4 DenavitHartenberg::getModel(bool call_from_frame) {
+	// Evitar recalcular
+	if (call_from_frame) return this->model;
+
+	switch (this->tipo) {
+	case TIPO_ACCION::ROTATION:
+		this->model = glm::translate(glm::mat4(1.0f), this->origin_o);
+		this->model = glm::rotate(this->model, glm::radians(this->alpha), this->z);
+		this->model = glm::translate(this->model, -this->origin_o);
+		break;
+	case TIPO_ACCION::PRISMATIC:
+		this->model = glm::translate(glm::mat4(1.0f), glm::radians(this->mv) * this->z);
+		break;
+	default:
+		this->model = glm::mat4(1.0f);
+		printf("[Critical] Por alguna razon no esta definido el tipo de accion de este eje, checar como paso el constructor\n");
+	}
+
+	if(this->anterior) this->model = this->anterior->getModel(true) * this->model;
+	return this->model;
 }
 
 glm::vec3 DenavitHartenberg::getO() {

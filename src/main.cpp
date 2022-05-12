@@ -136,9 +136,7 @@ int main(void)
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init((char*)glGetString(GL_NUM_SHADING_LANGUAGE_VERSIONS));
-
-    glm::vec2 xy(0.0f);
-    float rotacion_base = 0.0f;
+    
 
     bool muestra_ejes = false;
 
@@ -148,6 +146,10 @@ int main(void)
     float rota_frame = 0.0f;
 
     ModeloRobot robot("E:/TareasProyectos/8vo/Robotica/RobotManipuladorMovil-DenavitHartenberg/Robot/OBJ_Robot.obj", height, width, shader, true);
+    float rotacion_base = 0.0f;
+    float rotacion_brazo_1 = 0.0f;
+    float rotacion_brazo_2 = 0.0f;
+    float rotacion_pinza = 0.0f;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -170,7 +172,10 @@ int main(void)
         robot.moveLastFrame(traslada_frame);
 
         robot.rotaBase(rotacion_base);
-        robot.traslada(glm::vec3(xy,0.0f));
+        robot.rotaBrazo1(rotacion_brazo_1);
+        robot.rotaBrazo2(rotacion_brazo_2);
+        robot.rotaPinza(rotacion_pinza);
+
         robot.muestraEjes(muestra_ejes);
 
         robot.dibujaRobot();
@@ -182,11 +187,15 @@ int main(void)
             ImGui::Begin("UI");
 
             ImGui::Checkbox("Muestra ejes",&muestra_ejes);
-            ImGui::SliderFloat3("Traslada frame", &traslada_frame.x, -15.0f, 15.0f);
-            ImGui::SliderFloat("Rotacion frame", &rota_frame, 0.0f, 360.0f);
+            //ImGui::SliderFloat3("Traslada frame", &traslada_frame.x, -15.0f, 15.0f);
+            //ImGui::SliderFloat("Rotacion frame", &rota_frame, 0.0f, 360.0f);
 
-            ImGui::SliderFloat3("Traslacion", &xy.x, -15.0f, 15.0f);
-            ImGui::SliderFloat("Rotacion", &rotacion_base, 0.0f, 360.0f);
+            ImGui::SliderFloat("Rotacion base", &rotacion_base, -180.0, 180.0f);
+            ImGui::SliderFloat("Rotacion brazo 1", &rotacion_brazo_1, -180.0, 180.0f);
+            ImGui::SliderFloat("Rotacion brazo 2", &rotacion_brazo_2, -180.0, 180.0f);
+            ImGui::SliderFloat("Rotacion pinza", &rotacion_pinza, -180.0, 180.0f);
+            
+            
             ImGui::SliderInt("Partes", &parts, 0, 9);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
