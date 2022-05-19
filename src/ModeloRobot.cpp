@@ -223,49 +223,13 @@ ModeloRobot::ModeloRobot(std::string path, int height, int width, unsigned int s
 
 	glUseProgram(0);
 
+	if (this->show_logs) printf("[Info] Empezando a instanciar las clases PQP_MODEL");
 	buildCollisionModels();
-	testCollisions();
+	if (this->show_logs) printf("[Info] Se ha finalizado de instanciar las clases PQP_MODEL");
 
 	return;
 }
 
-void ModeloRobot::testCollisions() {
-
-	PQP_REAL R1[3][3], R2[3][3], T1[3], T2[3];
-
-	PQP_CollideResult cres;
-	PQP_DistanceResult dres;
-	
-
-	for (int i = 0; i < vertices_por_partes.size(); i++) {
-		for (int j = 0; j < vertices_por_partes.size(); j++) {
-
-			R1[0][0] = R1[1][1] = R1[2][2] = 1.0;
-			R1[0][1] = R1[1][0] = R1[2][0] = 0.0;
-			R1[0][2] = R1[1][2] = R1[2][1] = 0.0;
-
-			R2[0][0] = R2[1][1] = R2[2][2] = 1.0;
-			R2[0][1] = R2[1][0] = R2[2][0] = 0.0;
-			R2[0][2] = R2[1][2] = R2[2][1] = 0.0;
-
-			T1[0] = 0.0;  T1[1] = 0.0; T1[2] = 0.0;
-			T2[0] = 0.0;  T2[1] = 0.0; T2[2] = 0.0;
-
-			if (abs(i - j) == 1) {
-				T2[2] = 0.001;
-			}
-
-			PQP_Collide(&cres, R1, T1, PQP_Models[i], R2, T2, PQP_Models[j], PQP_FIRST_CONTACT);
-			PQP_Distance(&dres, R1, T1, PQP_Models[i], R2, T2, PQP_Models[j], 0.0, 0.0);
-
-			printf("(%d, %lf) ", cres.NumPairs(), dres.Distance());
-		}
-		printf("\n");
-	}
-
-	getchar();
-	return;
-}
 
 void ModeloRobot::buildCollisionModels() {
 	PQP_REAL p1[3], p2[3], p3[3];
@@ -306,7 +270,75 @@ void ModeloRobot::buildCollisionModels() {
 		acum_vertices += vertices_por_partes[i];
 		acum_faces += faces_por_partes[i];
 	}
+
+	/*
+	Base: 		[-180, 180]
+	Brazo 1:	[-60, 145]
+	Brazo 2:	[-180, 0]
+	Pinzas:		[-78, -6]
+
+
+	Checar
+		2,0
+		3,0	3,1	
+		4,0	4,1	4,2
+		5,0	5,1	5,2	5,3
+		6,0	6,1	6,2	6,3
+		7,0	7,1	7,2	7,3
+	*/
+
+	posible_autointerseccion.push_back({2,0});
+
+	posible_autointerseccion.push_back({3,0});
+	posible_autointerseccion.push_back({3,1});
+
+	posible_autointerseccion.push_back({4,0});
+	posible_autointerseccion.push_back({4,1});
+	posible_autointerseccion.push_back({4,2});
+
+	posible_autointerseccion.push_back({5,0});
+	posible_autointerseccion.push_back({5,1});
+	posible_autointerseccion.push_back({5,2});
+	posible_autointerseccion.push_back({5,3});
+	
+	posible_autointerseccion.push_back({6,0});
+	posible_autointerseccion.push_back({6,1});
+	posible_autointerseccion.push_back({6,2});
+	posible_autointerseccion.push_back({6,3});
+	
+	posible_autointerseccion.push_back({7,0});
+	posible_autointerseccion.push_back({7,1});
+	posible_autointerseccion.push_back({7,2});
+	posible_autointerseccion.push_back({7,3});
+
 	return;
+}
+
+bool ModeloRobot::enColision() {
+	PQP_REAL R1[3][3], R2[3][3], T1[3], T2[3];
+	PQP_CollideResult cres;
+	
+	for (auto pareja : posible_autointerseccion) {
+		PQP_Model *model1 = PQP_Models[pareja.first];
+		PQP_Model *model2 = PQP_Models[pareja.second];
+
+		glm::mat4 matrix1 = frame_principal[pareja.first]->getModel(false, false);
+		matrix1 = glm::transpose(matrix1);
+
+		glm::mat4 matrix2 = frame_principal[pareja.second]->getModel(false, false);
+		matrix2 = glm::transpose(matrix2);
+
+		for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) R1[i][j] = matrix1[i][j];
+		for (int i = 0; i < 3; i++) T1[i] = matrix1[i][3];
+		
+		for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) R2[i][j] = matrix2[i][j];
+		for (int i = 0; i < 3; i++) T2[i] = matrix2[i][3];
+
+		PQP_Collide(&cres, R1, T1, model1, R2, T2, model2, PQP_FIRST_CONTACT);
+
+		if (cres.NumPairs() > 0) return true;
+	}
+	return false;
 }
 
 // DELETE FROM HERE
@@ -341,7 +373,6 @@ void ModeloRobot::cargaModelo() {
 	int curr_cont_vertices = 0, curr_cont_faces = 0;
 	int acum = 0;
 
-	bool OK_FIRST = false;
 
 	while (input >> ch) {
 		switch (ch)
@@ -378,15 +409,6 @@ void ModeloRobot::cargaModelo() {
 			curr_cont_faces++;
 
 			input >> f1 >> f2 >> f3;
-
-			if (!OK_FIRST && vertices_por_partes.size()==1) {
-				printf("[Input]\n\tp1: %.4f %.4f %.4f\n\tp2: %.4f %.4f %.4f\n\tp3: %.4f %.4f %.4f\n",
-					vertices[7 * (f1-1)], vertices[7 * (f1 - 1) + 1], vertices[7 * (f1 - 1) + 2],
-					vertices[7 * (f2-1)], vertices[7 * (f2 - 1) + 1], vertices[7 * (f2 - 1) + 2],
-					vertices[7 * (f3 -1)], vertices[7 * (f3 - 1) + 1], vertices[7 * (f3 - 1) + 2]);
-
-				OK_FIRST = true;
-			}
 
 			faces.push_back(f1 - 1 - acum);
 			faces.push_back(f2 - 1 - acum);
@@ -456,33 +478,56 @@ void ModeloRobot::muestraEjes(bool flag) {
 	return;
 }
 
-void ModeloRobot::trasladaEje1(float mv) {
+bool ModeloRobot::trasladaEje1(float mv) {
 	piezas[0].traslada(mv);
-	return;
+	return true;
 }
 
-void ModeloRobot::trasladaEje2(float mv) {
+bool ModeloRobot::trasladaEje2(float mv) {
 	piezas[1].traslada(mv);
-	return;
+	return true;
 }
 
-void ModeloRobot::rotaBase(float alpha_) {
-	//rotaciones[1] = alpha_;
+bool ModeloRobot::rotaBase(float alpha_) {
 	piezas[2].rota(alpha_);
-	return;
+	return true;
 }
 
-void ModeloRobot::rotaBrazo1(float alpha_) {
+bool ModeloRobot::rotaBrazo1(float alpha_) {
+	if (alpha_ < min_angle_brazo1 || alpha_ > max_angle_brazo1) return false;
+
+	// Si el movimiento causara colision no se hace
+	float temp = piezas[3].getParametro();
 	piezas[3].rota(alpha_);
-	return;
+	if (enColision()) {
+		piezas[3].rota(temp);
+		return false;
+	}
+	return true;
 }
-void ModeloRobot::rotaBrazo2(float alpha_) {
+bool ModeloRobot::rotaBrazo2(float alpha_) {
+	if (alpha_ < min_angle_brazo2 || alpha_ > max_angle_brazo2) return false;
+
+	// Si el movimiento causara colision no se hace
+	float temp = piezas[4].getParametro();
 	piezas[4].rota(alpha_);
-	return;
+	if (enColision()) {
+		piezas[4].rota(temp);
+		return false;
+	}
+	return true;
 }
-void ModeloRobot::rotaPinza(float alpha_) {
+bool ModeloRobot::rotaPinza(float alpha_) {
+	if (alpha_ < min_angle_pinzas || alpha_ > max_angle_pinzas) return false;
+
+	// Si el movimiento causara colision no se hace
+	float temp = piezas[5].getParametro();
 	piezas[5].rota(alpha_);
-	return;
+	if (enColision()) {
+		piezas[5].rota(temp);
+		return false;
+	}
+	return true;
 }
 
 void ModeloRobot::rotaCamara(float theta_, float phi_) {
@@ -542,7 +587,7 @@ void ModeloRobot::dibujaRobot() {
 	
 	glm::mat4 model = glm::mat4(1.0f);
 	//model = glm::rotate(model, glm::radians(rotaciones[1]), glm::vec3(0.0f, 1.0f, 0.0f));
-	model = glm::translate(model, -centros[0]);
+	//model = glm::translate(model, -centros[0]);
 
 	for (int i = 0; i < how_many_parts /*vertices_por_partes.size()*/; i++) {
 		// Dibujando i-esima parte
@@ -555,7 +600,7 @@ void ModeloRobot::dibujaRobot() {
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const void*)(3 * sizeof(float)));
 
-		model = frame_principal[i]->getModel(false);
+		model = frame_principal[i]->getModel(true, false);
 
 		glUniformMatrix4fv(view_location, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(proj_location, 1, GL_FALSE, glm::value_ptr(proj));

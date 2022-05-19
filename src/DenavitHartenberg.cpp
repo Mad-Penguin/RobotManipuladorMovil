@@ -139,9 +139,9 @@ void DenavitHartenberg::traslada(float mv) {
 	return;
 }
 
-glm::mat4 DenavitHartenberg::getModel(bool call_from_frame) {
+glm::mat4 DenavitHartenberg::getModel(bool memo, bool call_from_frame) {
 	// Evitar recalcular
-	if (call_from_frame) return this->model;
+	if (call_from_frame && memo) return this->model;
 
 	switch (this->tipo) {
 	case TIPO_ACCION::ROTATION:
@@ -176,4 +176,9 @@ glm::vec3 DenavitHartenberg::getY() {
 }
 glm::vec3 DenavitHartenberg::getZ() {
 	return this->z;
+}
+
+float DenavitHartenberg::getParametro() {
+	if (this->tipo == TIPO_ACCION::PRISMATIC) return this->mv;
+	return this->alpha;
 }

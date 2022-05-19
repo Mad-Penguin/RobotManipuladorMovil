@@ -161,9 +161,15 @@ int main(void)
     float traslacion_eje_2 = 0.0f;
 
     float rotacion_base = 0.0f;
+
     float rotacion_brazo_1 = 0.0f;
+    float last_rotacion_brazo_1 = 0.0f;
+    
     float rotacion_brazo_2 = 0.0f;
+    float last_rotacion_brazo_2 = 0.0f;
+
     float rotacion_pinza = 0.0f;
+    float last_rotacion_pinza = 0.0f;
 
 
     /* Loop until the user closes the window */
@@ -192,13 +198,17 @@ int main(void)
         robot.trasladaEje2(traslacion_eje_2);
 
         robot.rotaBase(rotacion_base);
-        robot.rotaBrazo1(rotacion_brazo_1);
-        robot.rotaBrazo2(rotacion_brazo_2);
-        robot.rotaPinza(rotacion_pinza);
+        if (!robot.rotaBrazo1(rotacion_brazo_1)) rotacion_brazo_1 = last_rotacion_brazo_1;
+        if (!robot.rotaBrazo2(rotacion_brazo_2)) rotacion_brazo_2 = last_rotacion_brazo_2;
+        if (!robot.rotaPinza(rotacion_pinza)) rotacion_pinza = last_rotacion_pinza;
 
         robot.muestraEjes(muestra_ejes);
 
         robot.dibujaRobot();
+
+        last_rotacion_brazo_1 = rotacion_brazo_1;
+        last_rotacion_brazo_2 = rotacion_brazo_2;
+        last_rotacion_pinza = rotacion_pinza;
 
         {
             static float f = 0.0f;

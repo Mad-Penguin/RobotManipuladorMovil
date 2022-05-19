@@ -43,6 +43,8 @@ public:
 	glm::vec3 getX();
 	glm::vec3 getY();
 	glm::vec3 getZ();
-	glm::mat4 getModel(bool call_from_frame = false);
+	glm::mat4 getModel(bool memo, bool call_from_frame = false);
+
+	float getParametro();
 
 };

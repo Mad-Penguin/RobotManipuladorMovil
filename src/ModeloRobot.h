@@ -28,6 +28,18 @@ private:
 	std::vector<glm::vec3> centros;
 
 	std::vector< DenavitHartenberg* > frame_principal;
+
+	/*
+		-------- Rangos de los grados de libertad --------
+		Base: 		[-180, 180]
+		Brazo 1:	[-60, 145]
+		Brazo 2:	[-180, 0]
+		Pinzas:		[-78, -6]
+	*/
+	float min_angle_base = -180.0f, max_angle_base = 180.0f;
+	float min_angle_brazo1 = -60.0f, max_angle_brazo1 = 145.0f;
+	float min_angle_brazo2 = -180.0f, max_angle_brazo2 = 0.0f;
+	float min_angle_pinzas = -78.0f, max_angle_pinzas = -6.0f;
 	
 	// OpenGL
 	int height, width;
@@ -67,8 +79,10 @@ private:
 
 	// PQP
 	std::vector< PQP_Model* > PQP_Models;
+	std::vector< std::pair<unsigned int, unsigned int> > posible_autointerseccion;
 	void buildCollisionModels();
-	void testCollisions();
+
+	bool enColision();
 
 public:
 	// DELETE THIS
@@ -79,12 +93,12 @@ public:
 
 	ModeloRobot(std::string path, int height, int width, unsigned int shader, bool show_logs = false);
 
-	void trasladaEje1(float mv);
-	void trasladaEje2(float mv);
-	void rotaBase(float alpha);
-	void rotaBrazo1(float alpha);
-	void rotaBrazo2(float alpha);
-	void rotaPinza(float alpha);
+	bool trasladaEje1(float mv);
+	bool trasladaEje2(float mv);
+	bool rotaBase(float alpha);
+	bool rotaBrazo1(float alpha);
+	bool rotaBrazo2(float alpha);
+	bool rotaPinza(float alpha);
 
 	void rotaCamara(float theta_, float phi_);
 
