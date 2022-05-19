@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{399cecb8-307b-4a3a-acbd-6502debb896e}</ProjectGuid>
+    <ProjectGuid>{0f64eacb-a872-4847-be6f-35768e49187c}</ProjectGuid>
     <RootNamespace>RobotManipuladorMovilDenavitHartenberg</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\imgui;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\imgui;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\pqp</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -105,7 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\imgui;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\imgui;$(SolutionDir)Dependencies\glm;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies\pqp</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -408,8 +408,19 @@
     <ClInclude Include="Dependencies\imgui\imstb_rectpack.h" />
     <ClInclude Include="Dependencies\imgui\imstb_textedit.h" />
     <ClInclude Include="Dependencies\imgui\imstb_truetype.h" />
+    <ClInclude Include="Dependencies\pqp\Build.h" />
+    <ClInclude Include="Dependencies\pqp\BV.h" />
+    <ClInclude Include="Dependencies\pqp\BVTQ.h" />
+    <ClInclude Include="Dependencies\pqp\GetTime.h" />
+    <ClInclude Include="Dependencies\pqp\MatVec.h" />
+    <ClInclude Include="Dependencies\pqp\OBB_Disjoint.h" />
+    <ClInclude Include="Dependencies\pqp\PQP.h" />
+    <ClInclude Include="Dependencies\pqp\PQP_Compile.h" />
+    <ClInclude Include="Dependencies\pqp\PQP_Internal.h" />
+    <ClInclude Include="Dependencies\pqp\RectDist.h" />
+    <ClInclude Include="Dependencies\pqp\Tri.h" />
+    <ClInclude Include="Dependencies\pqp\TriDist.h" />
     <ClInclude Include="src\DenavitHartenberg.h" />
-    <ClInclude Include="src\ModeloMundo.h" />
     <ClInclude Include="src\ModeloRobot.h" />
   </ItemGroup>
   <ItemGroup>
@@ -557,7 +568,6 @@
     <None Include="Dependencies\glm\gtx\vector_angle.inl" />
     <None Include="Dependencies\glm\gtx\vector_query.inl" />
     <None Include="Dependencies\glm\gtx\wrap.inl" />
-    <None Include="res\shaders\Basic.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dependencies\glm\detail\glm.cpp" />
@@ -568,9 +578,12 @@
     <ClCompile Include="Dependencies\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="Dependencies\imgui\imgui_tables.cpp" />
     <ClCompile Include="Dependencies\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Dependencies\pqp\Build.cpp" />
+    <ClCompile Include="Dependencies\pqp\BV.cpp" />
+    <ClCompile Include="Dependencies\pqp\PQP.cpp" />
+    <ClCompile Include="Dependencies\pqp\TriDist.cpp" />
     <ClCompile Include="src\DenavitHartenberg.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\ModeloMundo.cpp" />
     <ClCompile Include="src\ModeloRobot.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -2,7 +2,6 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include "ModeloMundo.h"
 #include "ModeloRobot.h"
 
 #include <GL/glew.h>
@@ -15,6 +14,16 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_glfw.h>
 
+/*
+---------------------------------------------------------------------------------------
+
+        [Collision detection] PQP
+
+Main page: https://gamma.cs.unc.edu/SSV/
+
+---------------------------------------------------------------------------------------
+*/
+#include "PQP.h"
 
 
 struct ShaderProgramSource {
@@ -146,10 +155,16 @@ int main(void)
     float rota_frame = 0.0f;
 
     ModeloRobot robot("E:/TareasProyectos/8vo/Robotica/RobotManipuladorMovil-DenavitHartenberg/Robot/OBJ_Robot.obj", height, width, shader, true);
+    glm::vec2 rotacion_camara(0.0f);
+
+    float traslacion_eje_1 = 0.0f;
+    float traslacion_eje_2 = 0.0f;
+
     float rotacion_base = 0.0f;
     float rotacion_brazo_1 = 0.0f;
     float rotacion_brazo_2 = 0.0f;
     float rotacion_pinza = 0.0f;
+
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -171,6 +186,11 @@ int main(void)
         robot.rotateLastFrame(rota_frame);
         robot.moveLastFrame(traslada_frame);
 
+        robot.rotaCamara(rotacion_camara[0], rotacion_camara[1]);
+
+        robot.trasladaEje1(traslacion_eje_1);
+        robot.trasladaEje2(traslacion_eje_2);
+
         robot.rotaBase(rotacion_base);
         robot.rotaBrazo1(rotacion_brazo_1);
         robot.rotaBrazo2(rotacion_brazo_2);
@@ -190,10 +210,15 @@ int main(void)
             //ImGui::SliderFloat3("Traslada frame", &traslada_frame.x, -15.0f, 15.0f);
             //ImGui::SliderFloat("Rotacion frame", &rota_frame, 0.0f, 360.0f);
 
-            ImGui::SliderFloat("Rotacion base", &rotacion_base, -180.0, 180.0f);
-            ImGui::SliderFloat("Rotacion brazo 1", &rotacion_brazo_1, -180.0, 180.0f);
-            ImGui::SliderFloat("Rotacion brazo 2", &rotacion_brazo_2, -180.0, 180.0f);
-            ImGui::SliderFloat("Rotacion pinza", &rotacion_pinza, -180.0, 180.0f);
+            ImGui::SliderFloat2("Rotacion camara", &rotacion_camara[0], -180.0f, 180.0f);
+
+            ImGui::SliderFloat("Traslacion eje 1",&traslacion_eje_1,-100.0f, 100.0f);
+            ImGui::SliderFloat("Traslacion eje 2",&traslacion_eje_2,-100.0f, 100.0f);
+
+            ImGui::SliderFloat("Rotacion base", &rotacion_base, -180.0f, 180.0f);
+            ImGui::SliderFloat("Rotacion brazo 1", &rotacion_brazo_1, -180.0f, 180.0f);
+            ImGui::SliderFloat("Rotacion brazo 2", &rotacion_brazo_2, -180.0f, 180.0f);
+            ImGui::SliderFloat("Rotacion pinza", &rotacion_pinza, -180.0f, 180.0f);
             
             
             ImGui::SliderInt("Partes", &parts, 0, 9);

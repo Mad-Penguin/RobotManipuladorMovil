@@ -19,7 +19,7 @@ private:
 
 	// Variables de movimiento rotacion/traslacion
 	float alpha = 0.0f;
-	glm::vec3 mv = glm::vec3(0.0f);
+	float mv = 0.0f;
 
 	// Cosas auxiliares
 	float epsilon = 0.001f;
@@ -36,8 +36,9 @@ public:
 	float norm(glm::vec3 v);
 	
 	void rota(float alha);
-	void traslada(glm::vec3 mv);
+	void traslada(float mv);
 
+	TIPO_ACCION getTipo();
 	glm::vec3 getO();
 	glm::vec3 getX();
 	glm::vec3 getY();

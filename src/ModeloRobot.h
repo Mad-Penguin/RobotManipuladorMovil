@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include "PQP.h"
 
 
 class ModeloRobot {
@@ -38,6 +39,10 @@ private:
 
 	float alpha = 0.0f, d_alpha = 0.5f;
 
+	// Camara
+	float theta = 0.0f, phi = 0.0f, radio = 300.0f;
+	glm::vec3 eye, center = glm::vec3(0.0f, 35.0f, 0.0f), up = glm::vec3(0.0f, 1.0f, 0.0f);
+
 	// Denavit Hartenberg
 	std::vector< DenavitHartenberg > piezas;
 	std::vector< glm::vec3 > vector_gap;
@@ -58,6 +63,13 @@ private:
 	unsigned int conexiones_last_frame = 6;
 	float rota_last_frame = 0.0f;
 
+	glm::vec3 updateEye();
+
+	// PQP
+	std::vector< PQP_Model* > PQP_Models;
+	void buildCollisionModels();
+	void testCollisions();
+
 public:
 	// DELETE THIS
 	int how_many_parts;
@@ -67,11 +79,14 @@ public:
 
 	ModeloRobot(std::string path, int height, int width, unsigned int shader, bool show_logs = false);
 
-	void traslada(glm::vec3 mv);
+	void trasladaEje1(float mv);
+	void trasladaEje2(float mv);
 	void rotaBase(float alpha);
 	void rotaBrazo1(float alpha);
 	void rotaBrazo2(float alpha);
 	void rotaPinza(float alpha);
+
+	void rotaCamara(float theta_, float phi_);
 
 	void dibujaRobot();
 	void muestraEjes(bool flag);
